@@ -1,0 +1,63 @@
+
+body {
+    background-image: url("../img/logo.png")no-repeat center center fixed;
+  background-size: cover;
+}
+
+.container {
+  height: 100vh;
+}
+
+.card {
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+form .form-control {
+  border-radius: 5px;
+  padding: 10px;
+}
+
+button {
+  border-radius: 5px;
+}
+
+.text-center a {
+  color: #6c63ff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.text-center a:hover {
+  text-decoration: underline;
+}
+
+/* Social Media Buttons */
+.social-login {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.social-login .btn {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 16px;
+}
+.object-fit-cover {
+    object-fit: cover; /* Ensures the image fills the entire space without stretching */
+    height: 100vh; /* Full height */
+  }
+  
+  .overlay-text {
+    background: rgba(0, 0, 0, 0.6); /* Dark overlay for better text visibility */
+    padding: 20px;
+    border-radius: 10px;
+  }
+ 

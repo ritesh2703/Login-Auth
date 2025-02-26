@@ -1,20 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithPopup, signInWithRedirect, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { Container, Row, Col, Card, Form, Button, Modal } from "react-bootstrap";
+import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaGithub } from "react-icons/fa";
 import "../styles/Login.css";
 import { auth, googleProvider, facebookProvider, githubProvider } from "../firebase/firebase";
-import Logo from "../img/logo.png";  
+import Logo from "../img/logo.png";  // Full-size background image
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showResetModal, setShowResetModal] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [showResetForm, setShowResetForm] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
 
   // Handle Email/Password Login
@@ -44,10 +44,11 @@ const Login = () => {
     }
   };
 
-  // Handle Forgot Password
-  const handlePasswordReset = async () => {
+  // Handle Password Reset
+  const handlePasswordReset = async (e) => {
+    e.preventDefault();
     if (!resetEmail) {
-      setResetMessage("Please enter your email.");
+      setResetMessage("Please enter a valid email.");
       return;
     }
 
@@ -62,7 +63,7 @@ const Login = () => {
   return (
     <Container fluid className="d-flex justify-content-center align-items-center vh-100">
       <Row className="shadow-lg rounded overflow-hidden w-75">
-        {/* Left Side (Image) */}
+        {/* Left Side (Full-Screen Image with Overlay) */}
         <Col md={6} className="d-none d-md-block p-0 position-relative">
           <img src={Logo} alt="Welcome" className="img-fluid w-100 h-100 object-fit-cover" />
           <div className="overlay-text position-absolute top-50 start-50 translate-middle text-white text-center px-4">
@@ -75,82 +76,90 @@ const Login = () => {
         <Col md={6} className="p-4 bg-white">
           <Card className="border-0">
             <Card.Body>
-              <h2 className="text-center mb-4">Login</h2>
-              <Form onSubmit={handleLogin}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Email address</Form.Label>
-                  <Form.Control
-                    type="email"
-                    placeholder="Enter email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </Form.Group>
+              <h2 className="text-center mb-4">{showResetForm ? "Reset Password" : "Login"}</h2>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    placeholder="Enter password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </Form.Group>
+              {/* Forgot Password Form */}
+              {showResetForm ? (
+                <Form onSubmit={handlePasswordReset}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Email address</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="Enter email"
+                      required
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                    />
+                  </Form.Group>
 
-                <Button variant="primary" type="submit" className="w-100">
-                  Login
-                </Button>
-
-                <div className="text-center mt-3">
-                  <Button variant="link" onClick={() => setShowResetModal(true)}>
-                    Forgot Password?
+                  <Button variant="primary" type="submit" className="w-100">
+                    Send Reset Link
                   </Button>
-                </div>
-              </Form>
+
+                  <div className="text-center mt-3">
+                    <a href="#" onClick={() => setShowResetForm(false)}>Back to Login</a>
+                  </div>
+
+                  {resetMessage && <p className="text-success text-center mt-3">{resetMessage}</p>}
+                </Form>
+              ) : (
+                <Form onSubmit={handleLogin}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Email address</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="Enter email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control
+                      type="password"
+                      placeholder="Enter password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </Form.Group>
+
+                  <Button variant="primary" type="submit" className="w-100">
+                    Login
+                  </Button>
+
+                  <div className="text-center mt-3">
+                    <a href="#" onClick={() => setShowResetForm(true)}>Forgot Password?</a>
+                  </div>
+                </Form>
+              )}
 
               {/* Social Logins */}
-              <div className="text-center mt-3">
-                <Button variant="outline-danger" className="w-100 my-2 d-flex align-items-center justify-content-center" onClick={() => handleSocialLogin(googleProvider)}>
-                  <FcGoogle className="me-2" size={20} /> Login with Google
-                </Button>
+              {!showResetForm && (
+                <div className="text-center mt-3">
+                  <Button variant="outline-danger" className="w-100 my-2 d-flex align-items-center justify-content-center" onClick={() => handleSocialLogin(googleProvider)}>
+                    <FcGoogle className="me-2" size={20} /> Login with Google
+                  </Button>
 
-                <Button variant="outline-primary" className="w-100 my-2 d-flex align-items-center justify-content-center" onClick={() => handleSocialLogin(facebookProvider)}>
-                  <FaFacebook className="me-2" size={20} /> Login with Facebook
-                </Button>
+                  <Button variant="outline-primary" className="w-100 my-2 d-flex align-items-center justify-content-center" onClick={() => handleSocialLogin(facebookProvider)}>
+                    <FaFacebook className="me-2" size={20} /> Login with Facebook
+                  </Button>
 
-                <Button variant="outline-dark" className="w-100 my-2 d-flex align-items-center justify-content-center" onClick={() => handleSocialLogin(githubProvider)}>
-                  <FaGithub className="me-2" size={20} /> Login with GitHub
-                </Button>
-              </div>
+                  <Button variant="outline-dark" className="w-100 my-2 d-flex align-items-center justify-content-center" onClick={() => handleSocialLogin(githubProvider)}>
+                    <FaGithub className="me-2" size={20} /> Login with GitHub
+                  </Button>
+
+                  <p className="mt-3">
+                    Don't have an account? <a href="/register">Register</a>
+                  </p>
+                </div>
+              )}
             </Card.Body>
           </Card>
         </Col>
       </Row>
-
-      {/* Forgot Password Modal */}
-      <Modal show={showResetModal} onHide={() => setShowResetModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Reset Password</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Group className="mb-3">
-            <Form.Label>Enter your email:</Form.Label>
-            <Form.Control
-              type="email"
-              value={resetEmail}
-              onChange={(e) => setResetEmail(e.target.value)}
-              required
-            />
-          </Form.Group>
-          {resetMessage && <p className="text-success">{resetMessage}</p>}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowResetModal(false)}>Cancel</Button>
-          <Button variant="primary" onClick={handlePasswordReset}>Send Reset Link</Button>
-        </Modal.Footer>
-      </Modal>
     </Container>
   );
 };

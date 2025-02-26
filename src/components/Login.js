@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithPopup, signInWithRedirect, signInWithEmailAndPassword } from "firebase/auth";
-import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
+import { signInWithPopup, signInWithRedirect, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { Container, Row, Col, Card, Form, Button, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaGithub } from "react-icons/fa";
 import "../styles/Login.css";
 import { auth, googleProvider, facebookProvider, githubProvider } from "../firebase/firebase";
-import Logo from "../img/logo.png";  // Full-size background image
+import Logo from "../img/logo.png";  
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
 
   // Handle Email/Password Login
   const handleLogin = async (e) => {
@@ -41,14 +44,27 @@ const Login = () => {
     }
   };
 
+  // Handle Forgot Password
+  const handlePasswordReset = async () => {
+    if (!resetEmail) {
+      setResetMessage("Please enter your email.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setResetMessage("Password reset email sent! Check your inbox.");
+    } catch (error) {
+      setResetMessage("Error: " + error.message);
+    }
+  };
+
   return (
     <Container fluid className="d-flex justify-content-center align-items-center vh-100">
       <Row className="shadow-lg rounded overflow-hidden w-75">
-        {/* Left Side (Full-Screen Image with Overlay) */}
+        {/* Left Side (Image) */}
         <Col md={6} className="d-none d-md-block p-0 position-relative">
           <img src={Logo} alt="Welcome" className="img-fluid w-100 h-100 object-fit-cover" />
-
-          {/* Overlay Text */}
           <div className="overlay-text position-absolute top-50 start-50 translate-middle text-white text-center px-4">
             <h2>Welcome Back!</h2>
             <p>Sign in to continue and explore amazing features.</p>
@@ -88,7 +104,9 @@ const Login = () => {
                 </Button>
 
                 <div className="text-center mt-3">
-                  <a href="/forgot-password">Forgot Password?</a>
+                  <Button variant="link" onClick={() => setShowResetModal(true)}>
+                    Forgot Password?
+                  </Button>
                 </div>
               </Form>
 
@@ -110,6 +128,29 @@ const Login = () => {
           </Card>
         </Col>
       </Row>
+
+      {/* Forgot Password Modal */}
+      <Modal show={showResetModal} onHide={() => setShowResetModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Reset Password</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group className="mb-3">
+            <Form.Label>Enter your email:</Form.Label>
+            <Form.Control
+              type="email"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              required
+            />
+          </Form.Group>
+          {resetMessage && <p className="text-success">{resetMessage}</p>}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowResetModal(false)}>Cancel</Button>
+          <Button variant="primary" onClick={handlePasswordReset}>Send Reset Link</Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
